@@ -7,11 +7,19 @@ class News extends CI_Controller {
 			parent::__construct();
 			$this->load->model('news_model');
 			$this->load->helper('url_helper');
+            $this->config->set_item('banner', 'News Section');
         }
 
+        //List page - show all the news article
         public function index()
 		{
-			$data['news'] = $this->news_model->get_news();
+            //this changes item in custom_config file (key, data)
+			$this->config->set_item('title', 'Seattle Sport News');
+            
+            //this changes item
+            $nav1 = $this->config->item('nav1');
+            
+            $data['news'] = $this->news_model->get_news();
 			$data['title'] = 'News archive';
 			
 			//$this->load->view('templates/header', $data);
@@ -19,21 +27,40 @@ class News extends CI_Controller {
 			//$this->load->view('templates/footer', $data);
 			
 		}
-
+    
+       //View Page - display the selected article 
        public function view($slug = NULL)
 		{
-			$data['news_item'] = $this->news_model->get_news($slug);
+               
+            /*
+            slug without dashes: 
+                $dashless_slug = str_replace("-", " ", $slug);
+                
+            slug with Title Case (only First letter of each word capitalize)
+                $foo = ucwords($foo);  
+            */
+           
+            //slug without dashes:
+            $dashless_slug = str_replace("-", " ", $slug);
+           
+            //slug with title case:
+            $dashless_slug = ucwords($dashless_slug);  
+           
+            //use dashless_slug for title tag with News Flash - at the beginning
+            $this->config->set_item('title', 'News Flash - ' . $dashless_slug);
 
-			if (empty($data['news_item']))
-			{
-					show_404();
-			}
+            $data['news_item'] = $this->news_model->get_news($slug);
 
-			$data['title'] = $data['news_item']['title'];
+            if (empty($data['news_item']))
+            {
+                show_404();
+            }
 
-			//$this->load->view('templates/header', $data);
-			$this->load->view('news/view', $data);
-			//$this->load->view('templates/footer', $data);
+            $data['title'] = $data['news_item']['title'];
+
+            //$this->load->view('templates/header', $data);
+            $this->load->view('news/view', $data);
+            //$this->load->view('templates/footer', $data);
 		}
 	
 		public function create()
